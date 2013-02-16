@@ -8,13 +8,18 @@ ParsedRequest = require('./request').ParsedRequest
 # Used to finish an HTTP response with an error
 # Don't include user controlled strings in 'phrase'
 finishWithError = (res, code, phrase) ->
-  res.writeHead(code, phrase, {"Content-Type": "text/html"})
-
-  res.end("""
+  errorDoc = """
     <!DOCTYPE html>
     <head><title>#{phrase}</title></head>
     <body><h1>#{phrase}</h1></body>
-  """)
+  """
+
+  res.writeHead(code, phrase,
+    "Content-Type": "text/html"
+    "Content-Length": errorDoc.length
+  )
+
+  res.end(errorDoc)
 
 http.createServer((req, res) ->
   # We only understand GET and HEAD
@@ -35,7 +40,22 @@ http.createServer((req, res) ->
       finishWithError(res, 404, 'Not Found')
       return
 
-    cacheControl = if blobInfo.isSymbolic
+    # Use the tree SHA-1 as the ETag 
+    # The tree SHA-1 recursively includes the blob's SHA1 which means this ETag
+    # is guaranteed to be stable
+    etag = '"' + blobInfo.treeSha1 + '"'
+
+    if req.headers['if-none-match'] == etag
+      # The file is the same version the client has
+      res.writeHead(304,
+        "ETag": etag
+      )
+
+      res.end()
+      return
+
+    # Send different caching headers for symbolic refs
+    cacheControl = if blobInfo.isSymbolicRef
       config.cache_control.symbolic
     else
       config.cache_control.sha1
@@ -43,10 +63,15 @@ http.createServer((req, res) ->
     # We have enough metadata
     res.writeHead(200,
       "Content-Length": blobInfo.size
-      "ETag": '"' + blobInfo.treeSha1 + '"'
+      "ETag": etag
       "Cache-Control": cacheControl
       "Content-Type": mime.lookup(parsedReq.path)
     )
+
+    # The client doen't want the body
+    if req.method is 'HEAD'
+      res.end()
+      return
 
     # Pipe the git cat-file output right to the HTTP response
     blobCat = git_blob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.path)

@@ -41,8 +41,8 @@ query = (repo, tree, path, callback) ->
       callback(null)
       return
 
-    # Is this symbolic?
-    isSymbolic = treeSha1.indexOf(tree) != 0
+    # Is this a symbolic ref?
+    isSymbolicRef = treeSha1.indexOf(tree) != 0
 
     # Find out the file size
     gitOutput(repo, 'cat-file', ['-s', "#{treeSha1}:#{path}"], (size) ->
@@ -50,7 +50,7 @@ query = (repo, tree, path, callback) ->
         callback(null)
         return
 
-      callback(treeSha1: treeSha1, isSymbolic: isSymbolic, size: size)
+      callback(treeSha1: treeSha1, isSymbolicRef: isSymbolicRef, size: size)
     )
   )
 
