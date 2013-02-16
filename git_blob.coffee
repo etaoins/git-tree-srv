@@ -1,3 +1,9 @@
+# Map treeSha1:pathname to size in bytes
+# This should be immutable so we can use it to skip a Git command without
+# risking stale data. Attackers can only expand this cache using legitimate
+# SHA-1/pathname pairs so the size is naturally limited
+blobSizeCache = {}
+
 # Spawns Git and returns the process
 spawnGit = (repo, subcommand, args = []) ->
   # Run the subcommand pointed at the right repo
@@ -31,6 +37,21 @@ gitOutput = (repo, subcommand, args, callback) ->
       callback(null)
   )
 
+cachingBlobSizeQuery = (repo, treeSha1, pathname, callback) ->
+  blobRef = "#{treeSha1}:#{pathname}"
+
+  if blobSizeCache[blobRef]?
+    # We have this size cached
+    callback(blobSizeCache[blobRef])
+  else
+    # Ask Git for the blob size
+    gitOutput(repo, 'cat-file', ['-s', blobRef], (size) ->
+      if size?
+        blobSizeCache[blobRef] = size
+
+      callback(size)
+    )
+
 query = (repo, tree, pathname, callback) ->
   blobInfo = {}
 
@@ -45,7 +66,7 @@ query = (repo, tree, pathname, callback) ->
     isSymbolicRef = treeSha1.indexOf(tree) != 0
 
     # Find out the file size
-    gitOutput(repo, 'cat-file', ['-s', "#{treeSha1}:#{pathname}"], (size) ->
+    cachingBlobSizeQuery(repo, treeSha1, pathname, (size) ->
       unless size?
         callback(null)
         return
