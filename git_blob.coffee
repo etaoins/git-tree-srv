@@ -31,7 +31,7 @@ gitOutput = (repo, subcommand, args, callback) ->
       callback(null)
   )
 
-query = (repo, tree, path, callback) ->
+query = (repo, tree, pathname, callback) ->
   blobInfo = {}
 
   # Parse the revision
@@ -45,7 +45,7 @@ query = (repo, tree, path, callback) ->
     isSymbolicRef = treeSha1.indexOf(tree) != 0
 
     # Find out the file size
-    gitOutput(repo, 'cat-file', ['-s', "#{treeSha1}:#{path}"], (size) ->
+    gitOutput(repo, 'cat-file', ['-s', "#{treeSha1}:#{pathname}"], (size) ->
       unless size?
         callback(null)
         return
@@ -54,8 +54,8 @@ query = (repo, tree, path, callback) ->
     )
   )
 
-cat = (repo, treeSha1, path) ->
-  spawnGit(repo, 'cat-file', ['-p', "#{treeSha1}:#{path}"])
+cat = (repo, treeSha1, pathname) ->
+  spawnGit(repo, 'cat-file', ['-p', "#{treeSha1}:#{pathname}"])
  
 module.exports.query = query
 module.exports.cat = cat

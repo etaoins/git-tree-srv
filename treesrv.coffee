@@ -30,12 +30,12 @@ http.createServer((req, res) ->
   # Try to parse the request
   parsedReq = new ParsedRequest(config, req)
 
-  unless parsedReq.tree? and parsedReq.path?
+  unless parsedReq.tree? and parsedReq.pathname?
     # Didn't work
     finishWithError(res, 404, 'Not Found')
     return
 
-  git_blob.query(parsedReq.repo, parsedReq.tree, parsedReq.path, (blobInfo) ->
+  git_blob.query(parsedReq.repo, parsedReq.tree, parsedReq.pathname, (blobInfo) ->
     unless blobInfo?
       finishWithError(res, 404, 'Not Found')
       return
@@ -65,7 +65,7 @@ http.createServer((req, res) ->
       "Content-Length": blobInfo.size
       "ETag": etag
       "Cache-Control": cacheControl
-      "Content-Type": mime.lookup(parsedReq.path)
+      "Content-Type": mime.lookup(parsedReq.pathname)
     )
 
     # The client doen't want the body
@@ -74,7 +74,7 @@ http.createServer((req, res) ->
       return
 
     # Pipe the git cat-file output right to the HTTP response
-    blobCat = git_blob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.path)
+    blobCat = git_blob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.pathname)
 
     blobCat.stdout.on('data', (data) ->
       res.write(data)
