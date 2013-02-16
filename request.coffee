@@ -1,3 +1,5 @@
+url = require('url')
+
 # Captures the tree and repo path from a request path
 treePathRegexp = /^([^\/]+)\/(.+)$/
 
@@ -8,10 +10,13 @@ class ParsedRequest
   @path = null
 
   constructor: (config, nodeReq) ->
+    # Ignore the query
+    fullPath = url.parse(nodeReq.url).pathname
+
     # Find the repo we're requesting
     for httpRoot, repo of config.repos
       # Don't do this in the regexp because escaping is annoying
-      if nodeReq.url.indexOf(httpRoot) == 0
+      if fullPath.indexOf(httpRoot) == 0
         @repo = repo
         @httpRoot = httpRoot
         break
@@ -21,7 +26,8 @@ class ParsedRequest
       return
 
     # Parse the remaining URL components
-    treeAndPath = treePathRegexp.exec(nodeReq.url[(@httpRoot.length)..])
+    decodedPath = decodeURIComponent(fullPath[(@httpRoot.length)..])
+    treeAndPath = treePathRegexp.exec(decodedPath)
 
     [unused, @tree, @path] = treeAndPath if treeAndPath
 
