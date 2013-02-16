@@ -18,8 +18,8 @@ config =
   repos:
     # HTTP root path for the repo
     "/project1":
-      # The filesystem path to the Git repository
-      filesystem_path: "/Users/bob/Code/project1"
+      # The filesystem path to the repository's git directory
+      git_dir: "/Users/bob/Code/project1/.git"
       # Optional path offset in to the repository
       # This is useful for limiting access or making shorter URLs
       subdir: "www/static"
