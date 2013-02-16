@@ -1,0 +1,5 @@
+# Ignore our config file. The user should copy this form config.coffee.example
+config.coffee
+
+# Ignore Vim swap files
+.*.swp
