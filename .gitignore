@@ -3,3 +3,6 @@ config.coffee
 
 # Ignore Vim swap files
 .*.swp
+
+# Ignore installed node modules
+/node_modules/

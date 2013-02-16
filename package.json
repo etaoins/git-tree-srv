@@ -1,0 +1,8 @@
+{
+  "name": "treesrv",
+  "version": "0.0.1",
+  "dependencies": {
+    "coffee-script": "1.4.x",
+    "mime": "1.2.x"
+  }
+}
