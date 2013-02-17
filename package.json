@@ -1,8 +1,21 @@
 {
-  "name": "treesrv",
+  "name": "git-tree-srv",
   "version": "0.0.1",
+  "author": "Ryan Cumming <etaoins@gmail.com>",
+  "description": "Simple HTTP server for hosting static files from a Git tree",
+  "bin": {
+    "git-tree-srv": "./bin/git-tree-srv"
+  },
   "dependencies": {
     "coffee-script": "1.4.x",
     "mime": "1.2.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etaoins/git-tree-srv.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
   }
 }

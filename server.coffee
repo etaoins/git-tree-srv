@@ -1,12 +1,12 @@
 http = require('http')
 mime = require('mime')
-git_blob = require('./git_blob')
+git_blob = require('./lib/git-blob')
 
-ParsedRequest = require('./request').ParsedRequest
+ParsedRequest = require('./lib/request').ParsedRequest
 
 # Make sure we have the right number of args
 if process.argv.length != 3
-  console.error("Usage: node treesrv.coffee config_File")
+  console.error("Usage: git-tree-srv config_File")
   process.exit(1)
 
 configFile = process.argv[2]
