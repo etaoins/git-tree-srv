@@ -1,9 +1,20 @@
 http = require('http')
 mime = require('mime')
-config = require('./config')
 git_blob = require('./git_blob')
 
 ParsedRequest = require('./request').ParsedRequest
+
+# Make sure we have the right number of args
+if process.argv.length != 3
+  console.error("Usage: node treesrv.coffee config_File")
+  process.exit(1)
+
+configFile = process.argv[2]
+
+try
+  config = require('./' + configFile)
+catch e
+  config = require(configFile)
 
 # Used to finish an HTTP response with an error
 # Don't include user controlled strings in 'phrase'
