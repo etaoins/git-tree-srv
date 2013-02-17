@@ -76,13 +76,18 @@ http.createServer((req, res) ->
     # Pipe the git cat-file output right to the HTTP response
     blobCat = git_blob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.pathname)
 
-    blobCat.stdout.on('data', (data) ->
-      res.write(data)
-    )
+    # HTTP responses are stream-like so we can pipe right to them
+    blobCat.stdout.pipe(res)
 
     blobCat.on('exit', ->
-      blobCat.stdout.end()
+      # The response is finished
       res.end()
+    )
+    
+    res.on('close', ->
+      # Remote end hung up - we can stop the cat
+      # disconnect is more friendly but it doesn't exist on Node 0.6
+      (blobCat.disconnect || blobCat.kill)()
     )
   )
 

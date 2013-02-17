@@ -1,14 +1,17 @@
+child_process = require('child_process')
+
 # Map treeSha1:pathname to size in bytes
 # This should be immutable so we can use it to skip a Git command without
 # risking stale data. Attackers can only expand this cache using legitimate
 # SHA-1/pathname pairs so the size is naturally limited
 blobSizeCache = {}
 
+gitArgs = (repo, subcommand, cmdArgs = []) ->
+  ["--git-dir=#{repo.git_dir}", subcommand].concat(cmdArgs)
+
 # Spawns Git and returns the process
-spawnGit = (repo, subcommand, args = []) ->
-  # Run the subcommand pointed at the right repo
-  args = ["--git-dir=#{repo.git_dir}", subcommand].concat(args)
-  gitProcess = require('child_process').spawn('git', args)
+spawnGit = (repo, subcommand, cmdArgs = []) ->
+  gitProcess = child_process.spawn('git', gitArgs(repo, subcommand, cmdArgs))
 
   # Dump any badness to the console
   gitProcess.stderr.on('data', (data) ->
@@ -17,23 +20,17 @@ spawnGit = (repo, subcommand, args = []) ->
 
   gitProcess
 
-# Spawns Git and invokes the callback with the contents of stdout on success
+# Execs Git and invokes the callback with the contents of stdout on success
 # or null on error
-gitOutput = (repo, subcommand, args, callback) ->
-  output = ''
+gitOutput = (repo, subcommand, cmdArgs, callback) ->
+  args = gitArgs(repo, subcommand, cmdArgs)
 
-  gitProcess = spawnGit(repo, subcommand, args)
-  gitProcess.stdout.on('data', (data) -> output += data)
-
-  gitProcess.on('exit', (code) ->
-    if code == 0
-      # Flush stdout
-      gitProcess.stdout.end()
-
-      # Success - cut off the trailing whitespace
-      callback(output.trimRight())
+  child_process.execFile('git', args, {}, (error, stdout, stderr) ->
+    unless error?
+      # Trim off the newline
+      callback(stdout.trimRight())
     else
-      # Failure
+      console.warn("git: #{stderr}")
       callback(null)
   )
 
