@@ -22,11 +22,6 @@ finishWithError = (res, code, phrase) ->
   res.end(errorDoc)
 
 http.createServer((req, res) ->
-  # We only understand GET and HEAD
-  unless req.method in ['GET', 'HEAD']
-    finishWithError(res, 400, 'Bad Request')
-    return
-
   # Try to parse the request
   parsedReq = new ParsedRequest(config, req)
 
@@ -38,6 +33,15 @@ http.createServer((req, res) ->
   git_blob.query(parsedReq.repo, parsedReq.tree, parsedReq.pathname, (blobInfo) ->
     unless blobInfo?
       finishWithError(res, 404, 'Not Found')
+      return
+    
+    # We only understand GET and HEAD
+    unless req.method in ['GET', 'HEAD']
+      res.writeHead(405, 'Method Not Allowed',
+        "Content-Length": 0
+        "Allow": "GET, HEAD"
+      )
+      res.end()
       return
 
     # Use the tree SHA-1 as the ETag 
