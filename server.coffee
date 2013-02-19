@@ -94,7 +94,7 @@ http.createServer((req, res) ->
     # HTTP responses are stream-like so we can pipe right to them
     blobCat.stdout.pipe(res)
 
-    blobCat.on('exit', ->
+    blobCat.stdout.on('close', ->
       # The response is finished
       res.end()
     )
