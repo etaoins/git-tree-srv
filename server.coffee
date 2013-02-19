@@ -6,7 +6,8 @@ ParsedRequest = require('./lib/request').ParsedRequest
 
 # Make sure we have the right number of args
 if process.argv.length != 3
-  console.error("Usage: git-tree-srv config_File")
+  console.error("Usage: git-tree-srv config_File\n")
+  console.error("See doc/config.coffee.example in the git-tree-srv package for more information")
   process.exit(1)
 
 configFile = process.argv[2]
@@ -107,3 +108,5 @@ http.createServer((req, res) ->
   )
 
 ).listen(config.http.port, config.http.bind_address)
+
+console.log("Listening on #{config.http.bind_address}:#{config.http.port}")
