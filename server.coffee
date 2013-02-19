@@ -7,7 +7,7 @@ ParsedRequest = require('./lib/request').ParsedRequest
 # Make sure we have the right number of args
 if process.argv.length != 3
   console.error("Usage: git-tree-srv config_File\n")
-  console.error("See doc/config.coffee.example in the git-tree-srv package for more information")
+  console.error("See doc/config.example.coffee in the git-tree-srv package for more information")
   process.exit(1)
 
 configFile = process.argv[2]
