@@ -27,14 +27,17 @@ class ParsedRequest
       return
 
     # Parse the remaining URL components
-    decodedReqPath = decodeURIComponent(fullReqPath[(@httpRoot.length)..])
-    treeAndPathname = treePathnameRegexp.exec(decodedReqPath)
+    treeAndPathname = treePathnameRegexp.exec(fullReqPath[(@httpRoot.length)..])
 
     unless treeAndPathname?
       # Didn't match
       return
 
-    [unused, @tree, pathname] = treeAndPathname
+    [unused, tree, pathname] = treeAndPathname
+
+    # Now that we've split on slashes we can safely decode escape characters
+    @tree = decodeURIComponent(tree)
+    pathname = decodeURIComponent(pathname)
 
     if pathname != pathUtil.normalize(pathname)
       # Don't allow denormalized paths
