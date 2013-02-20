@@ -37,6 +37,10 @@ http.createServer((req, res) ->
   # Try to parse the request
   parsedReq = new ParsedRequest(config, req)
 
+  res.on('error', (err) ->
+    console.warn("Response error: #{err.message}")
+  )
+
   unless parsedReq.tree? and parsedReq.pathname?
     # Didn't work
     finishWithError(res, 404, 'Not Found')
@@ -102,8 +106,7 @@ http.createServer((req, res) ->
     
     res.on('close', ->
       # Remote end hung up - we can stop the cat
-      # disconnect is more friendly but it doesn't exist on Node 0.6
-      (blobCat.disconnect || blobCat.kill)()
+      blobCat.stdout.destroy()
     )
   )
 
