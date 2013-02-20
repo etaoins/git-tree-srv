@@ -10,7 +10,7 @@ git-tree-srv is a [Node.js](http://nodejs.org) application intended to be instal
 
 Before running git-tree-srv a configuration file must be created. See [config.example.coffee](doc/config.example.coffee) for an example configuration file. JavaScript configuration files are also accepted as long as the structure of the file is preserved.
 
-On Unix-like systems you can run `git-tree-srv [config file]` if npm's `bin` directory is in your path. Alternatively, it can be invoked directly as `coffee server.coffee [config file]` from the package directory.
+In Unix-like environments you can run `git-tree-srv [config file]` if npm's `bin` directory is in your path. On Windows `git-tree-srv` can be invoked from [msysgit](http://msysgit.github.com)'s bash prompt.
 
 # Usage
 

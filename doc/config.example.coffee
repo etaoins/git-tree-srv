@@ -27,6 +27,8 @@ config =
       # For bare repositories this should point to the root directory of repository
       # For checkouts with working trees this should point to the .git subdirectory
       git_dir: "/Users/bob/Code/project1/.git"
+      # git_dir: "c:/Users/bob/Code/project1/.git" # For Windows systems
+
       # Optional path offset in to the repository
       # This is useful for limiting access or making shorter URLs
       #subdir: "www/static/"
