@@ -19,7 +19,7 @@ Files from the Git repository can be accessed as http://hostname:port/reponame/r
 * *hostname* is the hostname of the server running git-tree-src
 * *port* is the configured value of `http.port`
 * *reponame* is the HTTP root path for the repository as configured in the `repos` section
-* *revision* is a [Git revision](http://www.kernel.org/pub/software/scm/git/docs/gitrevisions.html). Examples include branch names, tags, tree SHA-1s, and "HEAD". If the revision contains a `/` character (e.g. `origin/master`) it must be [percent encoded](http://en.wikipedia.org/wiki/Percent-encoding) as `%2f`
+* *revision* is a [Git revision](http://www.kernel.org/pub/software/scm/git/docs/gitrevisions.html). Examples include branch names, tags and tree SHA-1s. If the revision contains a `/` character (e.g. `origin/master`) it must be [percent encoded](http://en.wikipedia.org/wiki/Percent-encoding) as `%2f`
 * *path/to/file* is the path to the file in the Git repository. If the `subdir` configuration option for the repo is used this path is relative to `subdir`
 
 Parts of the URL after a `?` character are ignored to allow static web applications to safely pass data via query strings. To reference a repository path containing a literal `?` character percent encode it as `%3f`.
