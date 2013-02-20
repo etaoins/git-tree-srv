@@ -1,3 +1,4 @@
+EventEmitter = require('events').EventEmitter
 child_process = require('child_process')
 
 gitArgs = (repo, subcommand, cmdArgs = []) ->
@@ -28,5 +29,33 @@ gitOutput = (repo, subcommand, cmdArgs, callback) ->
       callback(null)
   )
 
+# Parses a given repo and tree revision to a tree SHA-1
+parseRevision = do ->
+  # Map of running GitRevParse instances indexed by repo:revision
+  revParseCommands = {}
+
+  class GitRevParse extends EventEmitter
+    constructor: (repo, revision) ->
+      gitOutput(repo, 'rev-parse', ['--verify', revision], (sha1) =>
+        @emit('finish', sha1)
+      )
+
+  return (repo, revision) ->
+    key = "#{repo.git_dir}:#{revision}"
+
+    # Only spawn a new GitRevParse if one isn't running
+    unless revParseCommands[key]?
+      revParse = new GitRevParse(repo, revision)
+      revParseCommands[key] = revParse
+
+      # Forget about the GitRevParse once it completes
+      revParse.once('finish', ->
+        delete revParseCommands[key]
+      )
+
+    return revParseCommands[key]
+
+
 module.exports.spawnGit = spawnGit
 module.exports.gitOutput = gitOutput
+module.exports.parseRevision = parseRevision

@@ -1,12 +1,13 @@
 gitUtil = require('./git-util')
 
-# Map treeSha1:pathname to size in bytes
+# Map of treeSha1:pathname to size in bytes
 # This should be immutable so we can use it to skip a Git command without
 # risking stale data. Attackers can only expand this cache using legitimate
 # SHA-1/pathname pairs so the size is naturally limited
 blobSizeCache = {}
 
-cachingBlobSizeQuery = (repo, treeSha1, pathname, callback) ->
+# Queries the size of a blob and caches it forever
+queryBlobSize = (repo, treeSha1, pathname, callback) ->
   blobRef = "#{treeSha1}:#{pathname}"
 
   if blobSizeCache[blobRef]?
@@ -21,11 +22,12 @@ cachingBlobSizeQuery = (repo, treeSha1, pathname, callback) ->
       callback(size)
     )
 
+# Queries the size and tree SHA-1 for a tree revision and pathname
 query = (repo, tree, pathname, callback) ->
   blobInfo = {}
 
   # Parse the revision
-  gitUtil.gitOutput(repo, 'rev-parse', ['--verify', tree], (treeSha1) ->
+  gitUtil.parseRevision(repo, tree).once('finish', (treeSha1) ->
     unless treeSha1?
       # Failed to parse the ref
       callback(null)
@@ -35,7 +37,7 @@ query = (repo, tree, pathname, callback) ->
     isSymbolicRef = treeSha1.indexOf(tree) != 0
 
     # Find out the file size
-    cachingBlobSizeQuery(repo, treeSha1, pathname, (size) ->
+    queryBlobSize(repo, treeSha1, pathname, (size) ->
       unless size?
         callback(null)
         return
@@ -44,6 +46,7 @@ query = (repo, tree, pathname, callback) ->
     )
   )
 
+# Returns a ChildProcess instance with stdout streaming the requested file
 cat = (repo, treeSha1, pathname) ->
   gitUtil.spawnGit(repo, 'cat-file', ['-p', "#{treeSha1}:#{pathname}"])
  

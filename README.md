@@ -31,4 +31,4 @@ By default browsers can cache files served from an explicit tree SHA-1 for 1 yea
 # Known Issues and Limitations
 
 * HTTPS, compression, authentication and URL rewriting are not supported. A reverse proxy such as [Nginx](http://nginx.org/en/) or [Varnish](https://www.varnish-cache.org) should be used if that functionality is desired.
-* Between one and three git processes are spawned for each successful request. For platforms with heavyweight process creation (such as Windows) this can cause poor performance. On Mac OS X the default process ulimit is very low and can cause git-tree-srv to crash if it receives too many concurrent requests.
+* Up to three `git` processes are spawned for each request. For platforms with heavyweight process creation (such as Windows) this can cause poor performance. On Mac OS X the default process ulimit is very low and can cause git-tree-srv to crash if it receives too many concurrent requests.
