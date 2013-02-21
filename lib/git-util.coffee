@@ -1,5 +1,5 @@
-EventEmitter = require('events').EventEmitter
-child_process = require('child_process')
+{EventEmitter} = require 'events'
+child_process = require 'child_process'
 
 gitArgs = (repo, subcommand, cmdArgs = []) ->
   ["--git-dir=#{repo.git_dir}", subcommand].concat(cmdArgs)
@@ -9,11 +9,10 @@ spawnGit = (repo, subcommand, cmdArgs = []) ->
   gitProcess = child_process.spawn('git', gitArgs(repo, subcommand, cmdArgs))
 
   # Dump any badness to the console
-  gitProcess.stderr.on('data', (data) ->
+  gitProcess.stderr.on 'data', (data) ->
     console.warn("git: #{data}")
-  )
 
-  gitProcess
+  return gitProcess
 
 # Execs Git and invokes the callback with the contents of stdout on success
 # or null on error
@@ -21,12 +20,12 @@ gitOutput = (repo, subcommand, cmdArgs, callback) ->
   args = gitArgs(repo, subcommand, cmdArgs)
 
   child_process.execFile('git', args, {}, (error, stdout, stderr) ->
-    unless error?
-      # Trim off the newline
-      callback(stdout.trimRight())
-    else
+    if error?
       console.warn("git: #{stderr}")
       callback(null)
+    else
+      # Trim off the newline
+      callback(stdout.trimRight())
   )
 
 # Parses a given repo and tree revision to a tree SHA-1
@@ -49,9 +48,8 @@ parseRevision = do ->
       revParseCommands[key] = revParse
 
       # Forget about the GitRevParse once it completes
-      revParse.once('finish', ->
+      revParse.once 'finish', ->
         delete revParseCommands[key]
-      )
 
     return revParseCommands[key]
 

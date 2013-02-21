@@ -1,4 +1,4 @@
-gitUtil = require('./git-util')
+gitUtil = require './git-util'
 
 # Map of treeSha1:pathname to size in bytes
 # This should be immutable so we can use it to skip a Git command without
@@ -27,7 +27,7 @@ query = (repo, tree, pathname, callback) ->
   blobInfo = {}
 
   # Parse the revision
-  gitUtil.parseRevision(repo, tree).once('finish', (treeSha1) ->
+  gitUtil.parseRevision(repo, tree).once 'finish', (treeSha1) ->
     unless treeSha1?
       # Failed to parse the ref
       callback(null)
@@ -44,7 +44,6 @@ query = (repo, tree, pathname, callback) ->
 
       callback(treeSha1: treeSha1, isSymbolicRef: isSymbolicRef, size: size)
     )
-  )
 
 # Returns a ChildProcess instance with stdout streaming the requested file
 cat = (repo, treeSha1, pathname) ->

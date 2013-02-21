@@ -1,8 +1,7 @@
-http = require('http')
-mime = require('mime')
-git_blob = require('./lib/git-blob')
-
-ParsedRequest = require('./lib/request').ParsedRequest
+http = require 'http'
+mime = require 'mime'
+gitBlob = require './lib/git-blob'
+{ParsedRequest} = require './lib/request'
 
 # Make sure we have the right number of args
 if process.argv.length != 3
@@ -13,9 +12,9 @@ if process.argv.length != 3
 configFile = process.argv[2]
 
 try
-  config = require('./' + configFile)
+  config = require './' + configFile
 catch e
-  config = require(configFile)
+  config = require configFile
 
 # Used to finish an HTTP response with an error
 # Don't include user controlled strings in 'phrase'
@@ -34,19 +33,20 @@ finishWithError = (res, code, phrase) ->
   res.end(errorDoc)
 
 http.createServer((req, res) ->
+  # Capture and log response errors
+  # These can happen if e.g. the remote end hangs up unexpectedly
+  res.on 'error', (err) ->
+    console.warn("Response error: #{err.message}")
+
   # Try to parse the request
   parsedReq = new ParsedRequest(config, req)
-
-  res.on('error', (err) ->
-    console.warn("Response error: #{err.message}")
-  )
 
   unless parsedReq.tree? and parsedReq.pathname?
     # Didn't work
     finishWithError(res, 404, 'Not Found')
     return
 
-  git_blob.query(parsedReq.repo, parsedReq.tree, parsedReq.pathname, (blobInfo) ->
+  gitBlob.query(parsedReq.repo, parsedReq.tree, parsedReq.pathname, (blobInfo) ->
     unless blobInfo?
       finishWithError(res, 404, 'Not Found')
       return
@@ -67,10 +67,7 @@ http.createServer((req, res) ->
 
     if req.headers['if-none-match'] == etag
       # The file is the same version the client has
-      res.writeHead(304,
-        "ETag": etag
-      )
-
+      res.writeHead(304, "ETag": etag)
       res.end()
       return
 
@@ -94,22 +91,19 @@ http.createServer((req, res) ->
       return
 
     # Pipe the git cat-file output right to the HTTP response
-    blobCat = git_blob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.pathname)
+    blobCat = gitBlob.cat(parsedReq.repo, blobInfo.treeSha1, parsedReq.pathname)
 
     # HTTP responses are stream-like so we can pipe right to them
     blobCat.stdout.pipe(res)
 
-    blobCat.stdout.on('close', ->
+    blobCat.stdout.on 'close', ->
       # The response is finished
       res.end()
-    )
     
-    res.on('close', ->
+    res.on 'close', ->
       # Remote end hung up - we can stop the cat
       blobCat.stdout.destroy()
-    )
   )
-
 ).listen(config.http.port, config.http.bind_address)
 
 console.log("Listening on #{config.http.bind_address}:#{config.http.port}")

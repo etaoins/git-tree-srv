@@ -1,5 +1,5 @@
-url = require('url')
-pathUtil = require('path')
+url = require 'url'
+pathUtil = require 'path'
 
 # Captures the tree and repo path from a request path
 treePathnameRegexp = /^([^\/]+)\/(.+)$/
