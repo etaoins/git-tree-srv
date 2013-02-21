@@ -16,6 +16,9 @@ try
 catch e
   config = require configFile
 
+# Our allowed HTTP methods 
+ALLOWED_METHODS = ['GET', 'HEAD', 'OPTIONS']
+
 # Used to finish an HTTP response with an error
 # Don't include user controlled strings in 'phrase'
 finishWithError = (res, code, phrase) ->
@@ -38,6 +41,21 @@ http.createServer((req, res) ->
   res.on 'error', (err) ->
     console.warn("Response error: #{err.message}")
 
+  if req.method is 'OPTIONS'
+    # Every resource that exists supports the same options
+    # Give them a canned response
+    headers =
+      "Content-Length": "0"
+      "Server": "git-tree-srv"
+      "Accept-Ranges": "none"
+
+    if req.url isnt '*'
+      headers["Allow"] = ALLOWED_METHODS.join(', ')
+
+    res.writeHead(200, "OK", headers)
+    res.end()
+    return
+
   # Try to parse the request
   parsedReq = new ParsedRequest(config, req)
 
@@ -51,11 +69,11 @@ http.createServer((req, res) ->
       finishWithError(res, 404, 'Not Found')
       return
     
-    # We only understand GET and HEAD
+    # We only understand GET and HEAD now; OPTIONS was handled earlier
     unless req.method in ['GET', 'HEAD']
       res.writeHead(405, 'Method Not Allowed',
         "Content-Length": 0
-        "Allow": "GET, HEAD"
+        "Allow": ALLOWED_METHODS.join(', ')
       )
       res.end()
       return
