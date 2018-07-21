@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "coffee-script": "1.4.x",
-    "mime": "1.2.x"
+    "mime": "~1.4.1"
   },
   "repository": {
     "type": "git",
